@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const uploadResumeRoute = require("./routes/parseResume");
 const getJobsRoute = require("./routes/getJobs");
+const careerInsightsRoute = require("./routes/careerInsights");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -13,6 +14,7 @@ app.use(express.json({ limit: "10mb" }));
 // Routes
 app.use("/upload-resume", uploadResumeRoute);
 app.use("/jobs", getJobsRoute);
+app.use("/career-insights", careerInsightsRoute);
 
 // Health check
 app.get("/", (req, res) => {

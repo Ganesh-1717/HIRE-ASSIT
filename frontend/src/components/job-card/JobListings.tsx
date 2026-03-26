@@ -1,6 +1,6 @@
 "use client";
 
-import { Job } from "@/app/page";
+import { Job } from "@/app/types";
 
 interface JobListingsProps {
   jobs: Job[];

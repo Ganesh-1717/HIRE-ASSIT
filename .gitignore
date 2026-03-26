@@ -9,3 +9,9 @@ coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.pdf
+HireAssist_Documentation.html
+convert_to_pdf.js
+/package.json
+/package-lock.json
+/node_modules/

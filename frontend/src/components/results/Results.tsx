@@ -1,6 +1,7 @@
 "use client";
 
-import { AnalysisResult } from "@/app/page";
+import { AnalysisResult } from "@/app/types";
+import Link from "next/link";
 
 interface ResultsProps {
   analysis: AnalysisResult;
@@ -175,20 +176,28 @@ export default function Results({ analysis }: ResultsProps) {
           delay="0.25s"
         >
           <div className="grid gap-2.5">
-            {analysis.recommended_roles.map((role, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-4 p-3.5 bg-gradient-to-r from-brand-50/80 to-violet-50/50 rounded-xl border border-brand-100/50 hover:border-brand-200 hover:shadow-sm transition-all duration-200 group"
-              >
-                <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center text-sm font-bold text-brand-600 shadow-sm border border-brand-100 group-hover:shadow-md transition-shadow">
-                  {i + 1}
-                </div>
-                <span className="font-semibold text-zinc-800 text-sm">{role}</span>
-                <svg className="w-4 h-4 text-zinc-300 ml-auto group-hover:text-brand-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            ))}
+            {analysis.recommended_roles.map((role, i) => {
+              const query = new URLSearchParams({
+                exp: analysis.experience_years || "",
+                skills: (analysis.technical_skills || []).slice(0, 5).join(","),
+              }).toString();
+              
+              return (
+                <Link
+                  href={`/career/${encodeURIComponent(role)}?${query}`}
+                  key={i}
+                  className="flex items-center gap-4 p-3.5 bg-gradient-to-r from-brand-50/80 to-violet-50/50 rounded-xl border border-brand-100/50 hover:border-brand-200 hover:shadow-sm transition-all duration-200 group cursor-pointer"
+                >
+                  <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center text-sm font-bold text-brand-600 shadow-sm border border-brand-100 group-hover:shadow-md transition-shadow">
+                    {i + 1}
+                  </div>
+                  <span className="font-semibold text-zinc-800 text-sm">{role}</span>
+                  <svg className="w-4 h-4 text-zinc-300 ml-auto group-hover:text-brand-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              );
+            })}
           </div>
         </SectionCard>
       )}
