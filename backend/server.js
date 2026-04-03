@@ -4,6 +4,8 @@ const cors = require("cors");
 const uploadResumeRoute = require("./routes/parseResume");
 const getJobsRoute = require("./routes/getJobs");
 const careerInsightsRoute = require("./routes/careerInsights");
+const webhooksRoute = require("./routes/webhooks");
+const careerChatRoute = require("./routes/careerChat");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -15,6 +17,8 @@ app.use(express.json({ limit: "10mb" }));
 app.use("/upload-resume", uploadResumeRoute);
 app.use("/jobs", getJobsRoute);
 app.use("/career-insights", careerInsightsRoute);
+app.use("/webhooks", webhooksRoute);
+app.use("/career-chat", careerChatRoute);
 
 // Health check
 app.get("/", (req, res) => {

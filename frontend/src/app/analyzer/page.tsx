@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Sidebar from "@/components/sidebar/Sidebar";
 import ResumeUpload from "@/components/upload/ResumeUpload";
 import Results from "@/components/results/Results";
 import JobListings from "@/components/job-card/JobListings";
 import { AnalysisResult, Job } from "@/app/types";
+import { useAuth } from "@clerk/nextjs";
+import { supabase } from "@/lib/supabaseClient";
 export type { AnalysisResult, Job };
 
 interface HistoryItem {
@@ -19,6 +21,7 @@ interface HistoryItem {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function Home() {
+  const { userId } = useAuth();
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,6 +29,40 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Load history from Supabase on mount
+  const loadHistory = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const { data, error: fetchError } = await supabase
+        .from("resume_history")
+        .select("*")
+        .eq("clerk_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (fetchError) {
+        console.error("Failed to load history:", fetchError);
+        return;
+      }
+
+      if (data) {
+        const items: HistoryItem[] = data.map((row: { id: string; file_name: string; created_at: string; analysis: AnalysisResult; jobs: Job[] }) => ({
+          id: row.id,
+          fileName: row.file_name,
+          timestamp: new Date(row.created_at),
+          analysis: row.analysis as AnalysisResult,
+          jobs: (row.jobs || []) as Job[],
+        }));
+        setHistory(items);
+      }
+    } catch (err) {
+      console.error("Failed to load history:", err);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
 
   const handleUpload = async (file: File) => {
     setLoading(true);
@@ -70,7 +107,7 @@ export default function Home() {
         }
       }
 
-      // Add to history
+      // Add to history locally
       const historyItem: HistoryItem = {
         id: Date.now().toString(),
         fileName: file.name,
@@ -79,6 +116,20 @@ export default function Home() {
         jobs: jobs,
       };
       setHistory((prev) => [historyItem, ...prev]);
+
+      // Save to Supabase
+      if (userId) {
+        try {
+          await supabase.from("resume_history").insert({
+            clerk_id: userId,
+            file_name: file.name,
+            analysis: data.analysis,
+            jobs: jobs,
+          });
+        } catch (saveErr) {
+          console.error("Failed to save to Supabase:", saveErr);
+        }
+      }
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "An unexpected error occurred";

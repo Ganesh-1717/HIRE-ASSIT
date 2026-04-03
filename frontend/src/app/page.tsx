@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { SignInButton, UserButton, Show } from "@clerk/nextjs";
 
 export default function HomePage() {
   const [isVisible, setIsVisible] = useState(false);
@@ -25,12 +26,24 @@ export default function HomePage() {
               Hire<span className="text-brand-500">Assist</span>
             </span>
           </div>
-          <Link
-            href="/analyzer"
-            className="px-5 py-2.5 bg-brand-500 text-white text-sm font-semibold rounded-xl hover:bg-brand-600 transition-all duration-200 shadow-sm hover:shadow-glow"
-          >
-            Launch App
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/analyzer"
+              className="px-5 py-2.5 bg-brand-500 text-white text-sm font-semibold rounded-xl hover:bg-brand-600 transition-all duration-200 shadow-sm hover:shadow-glow"
+            >
+              Launch App
+            </Link>
+            <Show when="signed-in">
+              <UserButton />
+            </Show>
+            <Show when="signed-out">
+              <SignInButton mode="modal">
+                <button className="px-5 py-2.5 bg-slate-100 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-200 transition-all duration-200">
+                  Sign In
+                </button>
+              </SignInButton>
+            </Show>
+          </div>
         </div>
       </nav>
 

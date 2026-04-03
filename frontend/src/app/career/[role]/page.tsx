@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CareerInsights, Job } from "../../types";
 import JobListings from "@/components/job-card/JobListings";
+import CareerChatbot from "@/components/career-chat/CareerChatbot";
 
 export default function CareerInsightsPage() {
   const params = useParams();
@@ -251,6 +252,9 @@ export default function CareerInsightsPage() {
           </div>
         </div>
       </main>
+
+      {/* AI Career Chatbot */}
+      <CareerChatbot role={role} context={insights} />
     </div>
   );
 }
