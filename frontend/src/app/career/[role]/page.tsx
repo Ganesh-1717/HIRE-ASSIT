@@ -29,14 +29,15 @@ export default function CareerInsightsPage() {
       setError(null);
 
       try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
         // Fetch insights and jobs in parallel
         const [insightsRes, jobsRes] = await Promise.all([
-          fetch("http://localhost:5000/career-insights", {
+          fetch(`${API_URL}/career-insights`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ role, experience_years: exp, skills: skills.split(",") }),
           }),
-          fetch("http://localhost:5000/jobs", {
+          fetch(`${API_URL}/jobs`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ roles: [role] }),

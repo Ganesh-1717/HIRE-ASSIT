@@ -55,7 +55,8 @@ export default function CareerChatbot({ role, context }: CareerChatbotProps) {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/career-chat", {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const res = await fetch(`${API_URL}/career-chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
