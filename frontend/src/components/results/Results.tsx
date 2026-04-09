@@ -212,21 +212,19 @@ export default function Results({ analysis }: ResultsProps) {
           count={analysis.missing_skills.length}
           delay="0.3s"
         >
-          <p className="text-xs text-zinc-400 mb-3 font-medium">Consider learning these to boost your profile — click to find tutorials</p>
+          <p className="text-xs text-zinc-400 mb-3 font-medium">Consider learning these to boost your profile — click to view the learning roadmap</p>
           <div className="flex flex-wrap gap-2">
             {analysis.missing_skills.map((skill, i) => (
-              <a
+              <Link
                 key={i}
-                href={`https://www.youtube.com/results?search_query=${encodeURIComponent(skill + " tutorial")}`}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={`/roadmap/${encodeURIComponent(skill)}`}
                 className="skill-tag-red inline-flex items-center gap-1.5 cursor-pointer hover:bg-rose-100 hover:border-rose-300 hover:shadow-sm transition-all duration-200 group"
               >
                 {skill}
-                <svg className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-600 transition-colors shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"/>
+                <svg className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-600 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
-              </a>
+              </Link>
             ))}
           </div>
         </SectionCard>
