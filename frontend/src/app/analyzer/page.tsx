@@ -30,6 +30,34 @@ export default function Home() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  // Restore analysis & jobs from sessionStorage when returning from insight/roadmap pages
+  useEffect(() => {
+    try {
+      const savedAnalysis = sessionStorage.getItem("hireassist_analysis");
+      const savedJobs = sessionStorage.getItem("hireassist_jobs");
+      if (savedAnalysis) {
+        setAnalysis(JSON.parse(savedAnalysis));
+      }
+      if (savedJobs) {
+        setJobs(JSON.parse(savedJobs));
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
+  }, []);
+
+  // Persist analysis to sessionStorage whenever it changes
+  useEffect(() => {
+    if (analysis) {
+      sessionStorage.setItem("hireassist_analysis", JSON.stringify(analysis));
+    }
+  }, [analysis]);
+
+  // Persist jobs to sessionStorage whenever they change
+  useEffect(() => {
+    sessionStorage.setItem("hireassist_jobs", JSON.stringify(jobs));
+  }, [jobs]);
+
   // Load history from Supabase on mount
   const loadHistory = useCallback(async () => {
     if (!userId) return;
@@ -149,6 +177,9 @@ export default function Home() {
     setAnalysis(null);
     setJobs([]);
     setError(null);
+    // Clear persisted state so upload form shows fresh
+    sessionStorage.removeItem("hireassist_analysis");
+    sessionStorage.removeItem("hireassist_jobs");
   };
 
   return (

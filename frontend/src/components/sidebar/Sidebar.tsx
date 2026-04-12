@@ -1,5 +1,8 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+
 interface HistoryItem {
   id: string;
   fileName: string;
@@ -21,6 +24,8 @@ export default function Sidebar({
   onHistoryClick,
   onNewAnalysis,
 }: SidebarProps) {
+  const { user } = useUser();
+  const router = useRouter();
   return (
     <>
       {/* Overlay on mobile */}
@@ -129,17 +134,37 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-white/5">
-          <div className="flex items-center gap-2.5 px-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center">
-              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse-soft" />
+        {/* Profile + Footer */}
+        <div className="p-4 border-t border-white/5 space-y-3">
+          {/* Profile Button */}
+          <button
+            onClick={() => router.push("/profile")}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all duration-200 group text-left"
+          >
+            {user?.imageUrl ? (
+              <img
+                src={user.imageUrl}
+                alt={user.fullName || "Profile"}
+                className="w-8 h-8 rounded-lg object-cover border border-white/10"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                {(user?.fullName || user?.firstName || "U")[0].toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-zinc-300 group-hover:text-white truncate transition-colors">
+                {user?.fullName || user?.firstName || "My Profile"}
+              </p>
+              <p className="text-[11px] text-zinc-600 truncate">
+                {user?.primaryEmailAddress?.emailAddress || "View profile"}
+              </p>
             </div>
-            <div>
-              <p className="text-[11px] text-zinc-400 font-medium">Powered by AI</p>
-              <p className="text-[10px] text-zinc-600">Groq &middot; Llama 3.3</p>
-            </div>
-          </div>
+            <svg className="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
         </div>
       </aside>
     </>
