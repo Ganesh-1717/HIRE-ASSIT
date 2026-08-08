@@ -141,29 +141,32 @@ export default function CareerInsightsPage() {
 
           {/* Salary Estimation */}
           <section className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm animate-slide-up" style={{ animationDelay: "0.1s" }}>
-            <h2 className="flex items-center gap-2 text-lg font-bold text-slate-800 mb-6">
-               <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Estimated Salary (India)
-            </h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+              <h2 className="flex items-center gap-2 text-lg font-bold text-slate-800">
+                <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Estimated Salary Range (India)
+              </h2>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[11px] font-bold border border-emerald-100">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live Market & Skill Calibrated
+              </span>
+            </div>
 
-            {insights.salary.candidate_estimate && (
-              <div className="mb-8 p-4 bg-gradient-to-r from-brand-50 to-violet-50 rounded-xl border border-brand-100 flex flex-col gap-2 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                  <svg className="w-16 h-16 text-brand-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                </div>
-                <div className="flex items-center justify-between relative z-10">
-                  <span className="text-sm font-bold text-brand-700 flex items-center gap-1.5">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                    Your Estimated Value
+            {insights.salary?.candidate_estimate && (
+              <div className="mb-8 p-5 bg-gradient-to-r from-brand-50 via-violet-50 to-emerald-50/40 rounded-xl border border-brand-100 flex flex-col gap-2.5 relative overflow-hidden shadow-sm">
+                <div className="flex items-center justify-between relative z-10 flex-wrap gap-2">
+                  <span className="text-sm font-bold text-brand-800 flex items-center gap-1.5">
+                    <svg className="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    Your Skill-Adjusted Valuation
                   </span>
-                  <span className="text-lg font-extrabold text-brand-900">
-                    {insights.salary.candidate_estimate.min >= 100000 ? `₹${(insights.salary.candidate_estimate.min / 100000).toFixed(1)}L` : `₹${(insights.salary.candidate_estimate.min / 1000).toFixed(0)}K`} - {insights.salary.candidate_estimate.max >= 100000 ? `₹${(insights.salary.candidate_estimate.max / 100000).toFixed(1)}L` : `₹${(insights.salary.candidate_estimate.max / 1000).toFixed(0)}K`}
+                  <span className="text-xl font-extrabold text-brand-900 bg-white/80 px-3 py-1 rounded-lg border border-brand-200/60 shadow-xs">
+                    {insights.salary.candidate_estimate.min >= 100000 ? `₹${(insights.salary.candidate_estimate.min / 100000).toFixed(1)} LPA` : `₹${(insights.salary.candidate_estimate.min / 1000).toFixed(0)}K`} - {insights.salary.candidate_estimate.max >= 100000 ? `₹${(insights.salary.candidate_estimate.max / 100000).toFixed(1)} LPA` : `₹${(insights.salary.candidate_estimate.max / 1000).toFixed(0)}K`}
                   </span>
                 </div>
-                <p className="text-xs text-brand-600/80 leading-relaxed font-medium relative z-10 max-w-[90%]">
-                  {insights.salary.candidate_estimate.rationale}
+                <p className="text-xs text-brand-700/90 leading-relaxed font-medium relative z-10">
+                  {insights.salary.candidate_estimate.rationale || "Calibrated based on your skills, experience, and current Indian tech market standards."}
                 </p>
               </div>
             )}
@@ -171,24 +174,28 @@ export default function CareerInsightsPage() {
             <div className="space-y-6">
               <SalaryBar 
                 level="Entry Level" 
-                range={insights.salary.entry} 
+                range={insights.salary?.entry || { min: 450000, max: 900000, label: "0-2 years" }} 
+                maxBound={insights.salary?.senior?.max || 4500000}
                 color="emerald" 
+                active={!exp || exp.includes("0-2") || exp.includes("entry") || exp.includes("1") || exp.includes("2")}
               />
               <SalaryBar 
                 level="Mid Level" 
-                range={insights.salary.mid} 
+                range={insights.salary?.mid || { min: 1000000, max: 2000000, label: "3-5 years" }} 
+                maxBound={insights.salary?.senior?.max || 4500000}
                 color="brand" 
-                active={exp === "3-5 years"}
+                active={exp.includes("3-5") || exp.includes("3") || exp.includes("4") || exp.includes("5")}
               />
               <SalaryBar 
                 level="Senior Level" 
-                range={insights.salary.senior} 
+                range={insights.salary?.senior || { min: 2200000, max: 4200000, label: "6+ years" }} 
+                maxBound={insights.salary?.senior?.max || 4500000}
                 color="violet" 
-                active={exp === "6+ years"}
+                active={exp.includes("6+") || exp.includes("senior") || exp.includes("6") || exp.includes("7") || exp.includes("8")}
               />
             </div>
-            <p className="text-xs text-slate-400 mt-6 text-center">
-              *Estimates based on current market data and AI analysis for the Indian tech hub markets.
+            <p className="text-[11px] text-slate-400 mt-6 text-center leading-relaxed">
+              *All salary figures represent Lakhs Per Annum (LPA) in INR based on live market postings and tier-1/tier-2 tech hub benchmarks in India.
             </p>
           </section>
 
@@ -260,9 +267,10 @@ export default function CareerInsightsPage() {
   );
 }
 
-function SalaryBar({ level, range, color, active }: { level: string, range: any, color: string, active?: boolean }) {
+function SalaryBar({ level, range, maxBound, color, active }: { level: string; range: any; maxBound?: number; color: string; active?: boolean }) {
   const formatINR = (num: number) => {
-    if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
+    if (!num) return "N/A";
+    if (num >= 100000) return `₹${(num / 100000).toFixed(1)} LPA`;
     return `₹${(num / 1000).toFixed(0)}K`;
   };
 
@@ -272,21 +280,28 @@ function SalaryBar({ level, range, color, active }: { level: string, range: any,
     violet: "bg-violet-500"
   };
 
+  const percent = maxBound && range?.max ? Math.min(100, Math.max(20, Math.round((range.max / maxBound) * 100))) : 80;
+
   return (
-    <div>
+    <div className={`p-3.5 rounded-xl transition-all ${active ? 'bg-slate-100/80 border border-slate-200/80 shadow-xs' : 'bg-transparent'}`}>
       <div className="flex justify-between items-end mb-2">
-        <div>
-          <span className={`text-sm font-bold ${active ? 'text-slate-900' : 'text-slate-700'}`}>{level}</span>
-          <span className="text-xs text-slate-500 ml-2">({range.label})</span>
+        <div className="flex items-center gap-2">
+          <span className={`text-sm font-bold ${active ? 'text-slate-900 font-extrabold' : 'text-slate-700'}`}>{level}</span>
+          <span className="text-xs text-slate-500">({range.label})</span>
+          {active && (
+            <span className="px-2 py-0.5 bg-brand-100 text-brand-700 font-bold text-[10px] rounded-md">
+              Your Level
+            </span>
+          )}
         </div>
-        <span className="text-sm font-bold text-slate-900">
+        <span className="text-sm font-extrabold text-slate-900">
           {formatINR(range.min)} - {formatINR(range.max)}
         </span>
       </div>
-      <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+      <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
         <div 
-          className={`h-full ${colorMap[color]} rounded-full opacity-80`} 
-          style={{ width: '100%' }}
+          className={`h-full ${colorMap[color]} rounded-full transition-all duration-500 ${active ? 'opacity-100 shadow-sm' : 'opacity-70'}`} 
+          style={{ width: `${percent}%` }}
         />
       </div>
     </div>

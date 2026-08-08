@@ -30,11 +30,25 @@ export default function ResumeUpload({ onUpload }: ResumeUploadProps) {
     });
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto space-y-6">
+      {/* Step Indicator */}
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
+            Terms & Conditions Accepted
+          </span>
+        </div>
+        <span className="text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-md border border-brand-100">
+          Step 2 of 2: Upload Resume
+        </span>
+      </div>
+
+      {/* Upload Dropzone Container */}
       <div
         {...getRootProps()}
         className={`
-          relative overflow-hidden border-2 border-dashed rounded-2xl p-16 text-center cursor-pointer
+          relative overflow-hidden border-2 border-dashed rounded-2xl p-14 text-center cursor-pointer
           transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group
           ${
             isDragActive && !isDragReject
@@ -111,7 +125,7 @@ export default function ResumeUpload({ onUpload }: ResumeUploadProps) {
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
-                  Secure
+                  Encrypted & Secure
                 </div>
               </div>
             </div>

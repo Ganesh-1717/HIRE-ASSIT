@@ -7,6 +7,8 @@ const careerInsightsRoute = require("./routes/careerInsights");
 const webhooksRoute = require("./routes/webhooks");
 const careerChatRoute = require("./routes/careerChat");
 const skillRoadmapRoute = require("./routes/skillRoadmap");
+const jobRecommenderRoute = require("./routes/jobRecommender");
+const feedbackRoute = require("./routes/feedback");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +23,8 @@ app.use("/career-insights", careerInsightsRoute);
 app.use("/webhooks", webhooksRoute);
 app.use("/career-chat", careerChatRoute);
 app.use("/skill-roadmap", skillRoadmapRoute);
+app.use("/recommend", jobRecommenderRoute);
+app.use("/feedback", feedbackRoute);
 
 // Health check
 app.get("/", (req, res) => {

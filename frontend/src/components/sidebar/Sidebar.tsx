@@ -136,6 +136,19 @@ export default function Sidebar({
 
         {/* Profile + Footer */}
         <div className="p-4 border-t border-white/5 space-y-3">
+          {/* Feedback Button */}
+          <button
+            onClick={() => router.push("/feedback")}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all duration-200 group text-left"
+          >
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 group-hover:border-zinc-700 transition-colors">
+              <svg className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <span className="text-sm font-medium text-zinc-400 group-hover:text-zinc-200 transition-colors">Feedback</span>
+          </button>
+
           {/* Profile Button */}
           <button
             onClick={() => router.push("/profile")}

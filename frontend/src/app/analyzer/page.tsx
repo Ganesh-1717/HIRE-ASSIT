@@ -3,10 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import Sidebar from "@/components/sidebar/Sidebar";
 import ResumeUpload from "@/components/upload/ResumeUpload";
+import TermsConsent from "@/components/upload/TermsConsent";
 import Results from "@/components/results/Results";
 import JobListings from "@/components/job-card/JobListings";
 import { AnalysisResult, Job } from "@/app/types";
 import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 export type { AnalysisResult, Job };
 
@@ -22,13 +24,16 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function Home() {
   const { userId } = useAuth();
+  const router = useRouter();
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [resumeText, setResumeText] = useState<string>("");
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingJobs, setLoadingJobs] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Restore analysis & jobs from sessionStorage when returning from insight/roadmap pages
   useEffect(() => {
@@ -97,6 +102,7 @@ export default function Home() {
     setError(null);
     setAnalysis(null);
     setJobs([]);
+    setResumeText("");
 
     try {
       const formData = new FormData();
@@ -114,6 +120,8 @@ export default function Home() {
       }
 
       setAnalysis(data.analysis);
+      const currentResumeText: string = data.resumeText || "";
+      setResumeText(currentResumeText);
 
       // Fetch jobs based on recommended roles
       if (data.analysis.recommended_roles?.length > 0) {
@@ -125,37 +133,85 @@ export default function Home() {
             body: JSON.stringify({ roles: data.analysis.recommended_roles }),
           });
           const jobsData = await jobsRes.json();
-          if (jobsData.success) {
-            setJobs(jobsData.jobs);
+          if (jobsData.success && jobsData.jobs?.length > 0) {
+            const rawJobs = jobsData.jobs;
+
+            // Rank jobs using the hybrid Jaccard + SBERT recommender.
+            // Falls back silently to unranked jobs if the service is unavailable.
+            // Determine final jobs list
+            let finalJobsList: Job[] = rawJobs;
+            try {
+              const recommendRes = await fetch(`${API_URL}/recommend`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  analysis: data.analysis,
+                  resumeText: currentResumeText,
+                  jobs: rawJobs,
+                }),
+              });
+              const recommendData = await recommendRes.json();
+              if (recommendRes.ok && recommendData.success) {
+                finalJobsList = recommendData.rankedJobs;
+              }
+            } catch (rankErr) {
+              console.warn("Job ranking unavailable, showing unranked jobs:", rankErr);
+            }
+
+            setJobs(finalJobsList);
+
+            // Add to history locally
+            const historyItem: HistoryItem = {
+              id: Date.now().toString(),
+              fileName: file.name,
+              timestamp: new Date(),
+              analysis: data.analysis,
+              jobs: finalJobsList,
+            };
+            setHistory((prev) => [historyItem, ...prev]);
+
+            // Save to Supabase
+            if (userId) {
+              try {
+                await supabase.from("resume_history").insert({
+                  clerk_id: userId,
+                  file_name: file.name,
+                  analysis: data.analysis,
+                  jobs: finalJobsList,
+                });
+              } catch (saveErr) {
+                console.error("Failed to save to Supabase:", saveErr);
+              }
+            }
           }
         } catch (jobErr) {
           console.error("Failed to fetch jobs:", jobErr);
         } finally {
           setLoadingJobs(false);
         }
-      }
+      } else {
+        // Add to history locally if no roles
+        const historyItem: HistoryItem = {
+          id: Date.now().toString(),
+          fileName: file.name,
+          timestamp: new Date(),
+          analysis: data.analysis,
+          jobs: [],
+        };
+        setHistory((prev) => [historyItem, ...prev]);
 
-      // Add to history locally
-      const historyItem: HistoryItem = {
-        id: Date.now().toString(),
-        fileName: file.name,
-        timestamp: new Date(),
-        analysis: data.analysis,
-        jobs: jobs,
-      };
-      setHistory((prev) => [historyItem, ...prev]);
-
-      // Save to Supabase
-      if (userId) {
-        try {
-          await supabase.from("resume_history").insert({
-            clerk_id: userId,
-            file_name: file.name,
-            analysis: data.analysis,
-            jobs: jobs,
-          });
-        } catch (saveErr) {
-          console.error("Failed to save to Supabase:", saveErr);
+        // Save to Supabase
+        if (userId) {
+          try {
+            await supabase.from("resume_history").insert({
+              clerk_id: userId,
+              file_name: file.name,
+              analysis: data.analysis,
+              jobs: [],
+            });
+          } catch (saveErr) {
+            console.error("Failed to save to Supabase:", saveErr);
+          }
         }
       }
     } catch (err: unknown) {
@@ -254,7 +310,11 @@ export default function Home() {
           {/* Upload Section */}
           {!analysis && !loading && (
             <div className="animate-slide-up-delayed">
-              <ResumeUpload onUpload={handleUpload} />
+              {acceptedTerms ? (
+                <ResumeUpload onUpload={handleUpload} />
+              ) : (
+                <TermsConsent onAccept={() => setAcceptedTerms(true)} />
+              )}
             </div>
           )}
 
@@ -345,8 +405,28 @@ export default function Home() {
               ) : (
                 jobs.length > 0 && <JobListings jobs={jobs} />
               )}
+
+              {/* Research Feedback Banner */}
+              <div className="bg-gradient-to-r from-brand-600 to-violet-600 rounded-2xl p-6 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-wider mb-2">
+                    🎓 IEEE Research Evaluation
+                  </div>
+                  <h3 className="text-lg font-bold">Help Us Evaluate HireAssist</h3>
+                  <p className="text-xs text-white/80 max-w-md mt-0.5">
+                    Now that you&apos;ve analyzed your resume, please take 1 minute to rate your experience and support our conference user study.
+                  </p>
+                </div>
+                <button
+                  onClick={() => router.push("/feedback")}
+                  className="px-5 py-3 bg-white text-brand-700 font-bold text-xs rounded-xl shadow-lg hover:bg-brand-50 transition-all shrink-0 active:scale-95"
+                >
+                  Give Feedback →
+                </button>
+              </div>
             </div>
           )}
+
         </div>
       </main>
     </div>
